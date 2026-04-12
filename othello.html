@@ -5,19 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <script src="stretch.js" defer></script>
+
     <title>Document</title>
 </head>
 
 <body>
     <h1>othelloGame</h1>
     <div id="board"></div>
+    <div id="currentPlayer"></div>
 
     <script>
         const othelloGame = () => {
             const board = document.querySelector('#board');
+            const player = document.querySelector('#currentPlayer');
             const boardArray = Array.from({ length: 8 }, () => Array(8).fill(0));
             let currentPlayer = 1;
+
 
             boardArray[3][3] = 1;
             boardArray[4][3] = -1;
@@ -52,28 +55,53 @@
             }
             displayBoard();
 
-
             boardChange = () => {
                 board.addEventListener('click', (e) => {
                     if (!e.target.classList.contains('cell')) return;
                     const row = Number(e.target.dataset.row);
                     const col = Number(e.target.dataset.col);
                     if (boardArray[row][col] !== 0) return;
+
+                    const flip = [];
+
                     for (let [dr, dc] of directions) {
                         let nr = row + dr;
                         let nc = col + dc;
-                        if (nr >= 0 && nr < 8 && nc > 0 && nc < 8 && boardArray[nr][nc] === -currentPlayer) {
-                            boardArray[row][col] = currentPlayer;
+                        const lineFlip = [];
+
+                        // 相手の石が続く間進む
+                        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && boardArray[nr][nc] === -currentPlayer) {
+                            lineFlip.push([nr, nc]);
+                            nr += dr;
+                            nc += dc;
+                        }
+
+                        // 最後に自分の石があればひっくり返せる
+                        if (lineFlip.length > 0 && nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && boardArray[nr][nc] === currentPlayer) {
+                            flip.push(...lineFlip);
                         }
                     }
 
-                    console.log(boardArray);
+                    // ひっくり返せる石がなければ無効
+                    if (flip.length === 0) return;
+
+                    // 石を置いてひっくり返す
+                    boardArray[row][col] = currentPlayer;
+                    for (let [fr, fc] of flip) {
+                        boardArray[fr][fc] = currentPlayer;
+                    }
+
+                    // プレイヤー交代（ループの外）
+                    currentPlayer *= -1;
                     displayBoard();
                 })
-
-
             }
             boardChange();
+
+
+
+
+
 
         }
         othelloGame();
