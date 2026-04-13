@@ -18,13 +18,8 @@
         const othelloGame = () => {
             const board = document.querySelector('#board');
             const player = document.querySelector('#currentPlayer');
-
             const boardArray = Array.from({ length: 8 }, () => Array(8).fill(0));
             let currentPlayer = 1;
-            const updatePlayer = () => {
-                player.textContent = currentPlayer === 1 ? '●' : '○';
-            }
-            updatePlayer();
 
 
             boardArray[3][3] = 1;
@@ -67,12 +62,14 @@
                     const col = Number(e.target.dataset.col);
                     if (boardArray[row][col] !== 0) return;
 
-                    const flip = [];
+                    let flip = [];
 
                     for (let [dr, dc] of directions) {
                         let nr = row + dr;
                         let nc = col + dc;
                         const lineFlip = [];
+                        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardArray[nr][nc] !== -currentPlayer) continue;
+
 
                         // 相手の石が続く間進む
                         while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && boardArray[nr][nc] === -currentPlayer) {
@@ -87,7 +84,7 @@
                         }
                     }
 
-                    // ひっくり返せる石がなければ無効
+                    // ひっくり返せる石がなければ無効にする処理が消えている
                     if (flip.length === 0) return;
 
                     // 石を置いてひっくり返す
@@ -98,8 +95,8 @@
 
                     // プレイヤー交代（ループの外）
                     currentPlayer *= -1;
-                    updatePlayer();
                     displayBoard();
+
                 })
             }
             boardChange();
